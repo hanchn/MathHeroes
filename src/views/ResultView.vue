@@ -40,26 +40,17 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-const props = defineProps({
-  totalQuestions: {
-    type: Number,
-    default: 10
-  },
-  correctCount: {
-    type: Number,
-    default: 0
-  },
-  wrongAnswers: {
-    type: Array, // [{ problem, userAnswer }]
-    default: () => []
-  }
-})
-
 const router = useRouter()
 
+// 从 history.state 获取数据
+const state = history.state || {}
+const totalQuestions = state.totalQuestions || 10
+const correctCount = state.correctCount || 0
+const wrongAnswers = state.wrongAnswers || []
+
 const score = computed(() => {
-  if (props.totalQuestions === 0) return 0
-  return Math.round((props.correctCount / props.totalQuestions) * 100)
+  if (totalQuestions === 0) return 0
+  return Math.round((correctCount / totalQuestions) * 100)
 })
 
 const getComment = (s) => {

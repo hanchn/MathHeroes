@@ -13,22 +13,43 @@
     <div class="main-content" :class="{ 'mental-mode': isMentalMode }">
       <!-- 左侧：Emoji 展示区 (仅普通模式) -->
       <div v-if="!isMentalMode" class="visual-area">
-        <div class="visual-row">
-          <EmojiGroup 
-            :count="visualData.group1.count" 
-            :emoji="currentEmoji" 
-            :isHidden="visualData.group1.hidden && !showHint"
-          />
-        </div>
-        <div class="operator-visual" v-if="visualData.operator">
-          {{ visualData.operator }}
-        </div>
-        <div class="visual-row">
-          <EmojiGroup 
-            :count="visualData.group2.count" 
-            :emoji="currentEmoji" 
-            :isHidden="visualData.group2.hidden && !showHint"
-          />
+        <!-- 三角形布局 -->
+        <div class="triangle-container">
+          <!-- 顶部：总数 -->
+          <div class="triangle-top">
+            <EmojiGroup 
+              :count="visualData.top.count" 
+              :emoji="currentEmoji" 
+              :isHidden="visualData.top.hidden && !showHint"
+              class="emoji-node"
+            />
+          </div>
+          
+          <!-- 连接线 -->
+          <div class="triangle-lines">
+            <div class="line-left"></div>
+            <div class="line-right"></div>
+          </div>
+
+          <!-- 底部：两个部分 -->
+          <div class="triangle-bottom">
+            <div class="bottom-node">
+              <EmojiGroup 
+                :count="visualData.left.count" 
+                :emoji="currentEmoji" 
+                :isHidden="visualData.left.hidden && !showHint"
+                class="emoji-node"
+              />
+            </div>
+            <div class="bottom-node">
+              <EmojiGroup 
+                :count="visualData.right.count" 
+                :emoji="currentEmoji" 
+                :isHidden="visualData.right.hidden && !showHint"
+                class="emoji-node"
+              />
+            </div>
+          </div>
         </div>
         
         <button class="hint-btn" @click="triggerHint" :disabled="showHint">
@@ -39,21 +60,35 @@
       <!-- 右侧：算式区 -->
       <div class="equation-area">
         <div class="equation">
-          <span :class="{ 'blank-placeholder': problem.blankIndex === 0 }">
-            {{ problem.blankIndex === 0 && !userAnswer ? '?' : (problem.blankIndex === 0 ? userAnswer : problem.num1) }}
-          </span>
-          
-          <span class="op">{{ problem.operator }}</span>
-          
-          <span :class="{ 'blank-placeholder': problem.blankIndex === 1 }">
-            {{ problem.blankIndex === 1 && !userAnswer ? '?' : (problem.blankIndex === 1 ? userAnswer : problem.num2) }}
-          </span>
-          
-          <span class="eq">=</span>
-          
-          <span :class="{ 'blank-placeholder': problem.blankIndex === 2 }">
-            {{ problem.blankIndex === 2 && !userAnswer ? '?' : (problem.blankIndex === 2 ? userAnswer : problem.result) }}
-          </span>
+          <!-- 复杂运算模式 -->
+          <template v-if="problem.type === 'complex'">
+             <span>{{ problem.num1 }}</span>
+             <span class="op">{{ problem.operator1 }}</span>
+             <span>{{ problem.num2 }}</span>
+             <span class="op">{{ problem.operator2 }}</span>
+             <span>{{ problem.num3 }}</span>
+             <span class="eq">=</span>
+             <span class="blank-placeholder">{{ userAnswer || '?' }}</span>
+          </template>
+
+          <!-- 普通模式 -->
+          <template v-else>
+            <span :class="{ 'blank-placeholder': problem.blankIndex === 0 }">
+              {{ problem.blankIndex === 0 && !userAnswer ? '?' : (problem.blankIndex === 0 ? userAnswer : problem.num1) }}
+            </span>
+            
+            <span class="op">{{ problem.operator }}</span>
+            
+            <span :class="{ 'blank-placeholder': problem.blankIndex === 1 }">
+              {{ problem.blankIndex === 1 && !userAnswer ? '?' : (problem.blankIndex === 1 ? userAnswer : problem.num2) }}
+            </span>
+            
+            <span class="eq">=</span>
+            
+            <span :class="{ 'blank-placeholder': problem.blankIndex === 2 }">
+              {{ problem.blankIndex === 2 && !userAnswer ? '?' : (problem.blankIndex === 2 ? userAnswer : problem.result) }}
+            </span>
+          </template>
         </div>
 
         <!-- 输入控制区 -->
@@ -69,11 +104,11 @@
           
           <button 
             class="voice-btn" 
-            :class="{ listening: isListening }" 
+            :class="{ listening: isListening, disabled: !hasSpeechSupport }" 
             @click="startVoiceInput"
-            :disabled="isProcessing"
+            :disabled="isProcessing || !hasSpeechSupport"
           >
-            {{ isListening ? '👂 听写中...' : '🎤 语音回答' }}
+            {{ hasSpeechSupport ? (isListening ? '👂 听写中...' : '🎤 语音回答') : '🚫 不支持语音' }}
           </button>
         </div>
 
@@ -91,19 +126,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { generateProblem, getRandomEmoji } from '@/utils/mathGenerator'
+import { generateProblem, generateComplexProblem, getRandomEmoji } from '@/utils/mathGenerator'
+import { parseVoiceInput } from '@/utils/voiceUtils'
 import EmojiGroup from '@/components/EmojiGroup.vue'
 
 const router = useRouter()
 const route = useRoute()
 
 // 参数获取
+const type = route.query.type || 'add_sub'
 const range = route.query.range || 10
 const mode = route.query.mode || 'normal'
 const totalQuestions = parseInt(route.query.count) || 10
-const isMentalMode = computed(() => mode === 'mental')
+const isMentalMode = computed(() => mode === 'mental' || type === 'complex') // 复杂运算强制心算模式
 
 // 状态
 const questions = ref([])
@@ -119,9 +156,11 @@ const inputRef = ref(null)
 const feedbackMessage = ref('')
 const feedbackClass = ref('')
 const isProcessing = ref(false) // 防止重复提交
+const hasErrorInCurrent = ref(false) // 当前题目是否出错过
 
 // 语音识别相关
 const isListening = ref(false)
+const hasSpeechSupport = ref(false)
 let recognition = null
 
 // 当前题目
@@ -133,16 +172,57 @@ const progressPercentage = computed(() => {
 })
 
 // 初始化题目集
-const initGame = () => {
+const initGame = async () => {
   const qList = []
-  for (let i = 0; i < totalQuestions; i++) {
-    qList.push(generateProblem('add_sub', range))
+  
+  // 尝试从本地题库加载 (仅限 add_sub)
+  if (type === 'add_sub') {
+    try {
+      // 假设题库文件名按 range 命名，例如 5.json, 10.json
+      // 注意：在生产环境或没有对应文件时，fetch 可能会 404
+      const response = await fetch(`/question_bank/${range}.json`)
+      if (response.ok) {
+        const bank = await response.json()
+        // 随机抽取指定数量的题目
+        // 如果题库数量不够，则全部取用，剩下的自动生成
+        const shuffled = bank.sort(() => 0.5 - Math.random())
+        const selected = shuffled.slice(0, totalQuestions)
+        
+        // 添加到列表（需确保格式一致）
+        selected.forEach(q => {
+          // 确保 id 唯一，避免 key 冲突
+          qList.push({ ...q, id: `bank_${q.id}_${Date.now()}` })
+        })
+        
+        console.log(`从题库加载了 ${selected.length} 题`)
+      }
+    } catch (e) {
+      console.log('加载本地题库失败或不存在，将使用自动生成', e)
+    }
   }
+  
+  // 如果题目不够，自动生成补齐
+  while (qList.length < totalQuestions) {
+    if (type === 'complex') {
+      qList.push(generateComplexProblem(range))
+    } else {
+      qList.push(generateProblem('add_sub', range))
+    }
+  }
+  
   questions.value = qList
+  
+  // 重置状态
+  currentIndex.value = 0
+  score.value = 0
+  correctCount.value = 0
+  wrongAnswers.value = []
+  
   loadQuestion()
   
   // 初始化语音识别
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    hasSpeechSupport.value = true
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognition = new SpeechRecognition()
     recognition.lang = 'zh-CN'
@@ -152,13 +232,18 @@ const initGame = () => {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript
       console.log('Voice result:', transcript)
-      // 尝试提取数字
-      const match = transcript.match(/\d+/)
-      if (match) {
-        userAnswer.value = match[0]
-        checkAnswer() // 自动提交
+      
+      // 使用新的解析逻辑
+      const num = parseVoiceInput(transcript)
+      
+      if (num !== null) {
+        userAnswer.value = num
+        feedbackMessage.value = `识别为: ${num}`
+        feedbackClass.value = 'info'
+        // 稍微延迟一下提交，让用户看到识别结果
+        setTimeout(() => checkAnswer(), 500)
       } else {
-        feedbackMessage.value = `没听清，你说的是 "${transcript}" 吗？`
+        feedbackMessage.value = `没听清 "${transcript}"`
         feedbackClass.value = 'info'
       }
       isListening.value = false
@@ -167,7 +252,19 @@ const initGame = () => {
     recognition.onerror = (event) => {
       console.error('Voice error:', event.error)
       isListening.value = false
-      feedbackMessage.value = '语音识别失败，请重试'
+      if (event.error === 'not-allowed') {
+        feedbackMessage.value = '请允许麦克风权限'
+      } else if (event.error === 'no-speech') {
+        feedbackMessage.value = '没听到声音，请重试'
+      } else if (event.error === 'network') {
+        feedbackMessage.value = '网络错误(Chrome需连接Google服务)'
+        // 提示用户尝试 Safari
+        if (navigator.userAgent.includes('Chrome')) {
+           setTimeout(() => alert('Chrome 语音识别需要连接 Google 服务器。国内用户请尝试使用 Safari 浏览器或检查网络代理。'), 500)
+        }
+      } else {
+        feedbackMessage.value = `出错: ${event.error}`
+      }
       feedbackClass.value = 'error'
     }
     
@@ -177,6 +274,12 @@ const initGame = () => {
   }
 }
 
+onUnmounted(() => {
+  if (recognition) {
+    recognition.abort()
+  }
+})
+
 const loadQuestion = () => {
   userAnswer.value = ''
   currentEmoji.value = getRandomEmoji()
@@ -184,52 +287,65 @@ const loadQuestion = () => {
   feedbackMessage.value = ''
   feedbackClass.value = ''
   isProcessing.value = false
+  hasErrorInCurrent.value = false // 重置错误标记
   
   nextTick(() => {
     if (inputRef.value) inputRef.value.focus()
   })
 }
 
-// 视觉展示逻辑 (复用之前的逻辑)
+// 视觉展示逻辑 (三角结构：Top=总数, Left/Right=部分)
 const visualData = computed(() => {
   const p = problem.value
-  if (!p.num1 && p.num1 !== 0) return { group1: {}, group2: {} }
+  if (!p.num1 && p.num1 !== 0) return { top: {}, left: {}, right: {} }
 
-  let knownCount = 0
-  let missingCount = 0
-  let op = ''
+  let top = { count: 0, hidden: false }
+  let left = { count: 0, hidden: false }
+  let right = { count: 0, hidden: false }
+
+  // 统一映射：
+  // 加法 A + B = C  => Top=C, Left=A, Right=B
+  // 减法 A - B = C  => Top=A, Left=B, Right=C (A是被减数，即总数)
 
   if (p.operator === '+') {
-     if (p.blankIndex === 2) { // A + B = ?
-       return {
-         group1: { count: p.num1, hidden: false },
-         group2: { count: p.num2, hidden: false },
-         operator: '+'
-       }
-     } else if (p.blankIndex === 0) { // ? + B = C
-       knownCount = p.num2
-       missingCount = p.num1
-     } else { // A + ? = C
-       knownCount = p.num1
-       missingCount = p.num2
-     }
-     op = '...'
-  } else { // A - B = C
-     return {
-         group1: { count: p.num1, hidden: false },
-         group2: { count: p.num2, hidden: false },
-         operator: '-'
-       }
+    // 加法: num1 + num2 = result
+    top.count = p.result
+    left.count = p.num1
+    right.count = p.num2
+
+    // 隐藏逻辑：未知的数字隐藏
+    if (p.blankIndex === 2) top.hidden = true // 结果未知
+    else if (p.blankIndex === 0) left.hidden = true // num1未知
+    else if (p.blankIndex === 1) right.hidden = true // num2未知
+
+  } else {
+    // 减法: num1 - num2 = result
+    top.count = p.num1 // 被减数是总数
+    left.count = p.num2 // 减数
+    right.count = p.result // 差
+
+    // 隐藏逻辑
+    if (p.blankIndex === 0) top.hidden = true // 被减数未知
+    else if (p.blankIndex === 1) left.hidden = true // 减数未知
+    else if (p.blankIndex === 2) right.hidden = true // 差未知
   }
   
-  return {
-    group1: { count: knownCount, hidden: false },
-    group2: { count: missingCount, hidden: true },
-    operator: op
-  }
+  return { top, left, right }
 })
 
 const triggerHint = () => {
+  // 检查是否有隐藏的 Emoji
+  const hasHidden = visualData.value.top.hidden || visualData.value.left.hidden || visualData.value.right.hidden
+  
+  if (!hasHidden) {
+    feedbackMessage.value = '数一数图中有多少个？'
+    feedbackClass.value = 'info'
+    setTimeout(() => {
+      feedbackMessage.value = ''
+    }, 1500)
+    return
+  }
+
   showHint.value = true
   setTimeout(() => {
     showHint.value = false
@@ -237,23 +353,36 @@ const triggerHint = () => {
 }
 
 const startVoiceInput = () => {
-  if (!recognition) {
-    alert('您的浏览器不支持语音识别，请使用 Chrome 浏览器。')
+  if (!hasSpeechSupport.value) return
+  
+  // 如果正在监听，再次点击则停止
+  if (isListening.value) {
+    recognition.stop()
+    isListening.value = false
     return
   }
-  if (isListening.value) return
   
   isListening.value = true
   feedbackMessage.value = '请说话...'
   feedbackClass.value = 'info'
-  recognition.start()
+  try {
+    recognition.start()
+  } catch (e) {
+    console.error('Start recognition failed', e)
+    isListening.value = false
+  }
   
-  // 3秒后如果没有结果自动停止 (虽然 recognition.onend 会处理，但加个保险)
+  // 延长超时时间到 8 秒
   setTimeout(() => {
     if (isListening.value) {
       recognition.stop()
+      // 如果超时还没结果，给个提示
+      if (feedbackMessage.value === '请说话...') {
+        feedbackMessage.value = '超时未检测到语音'
+        feedbackClass.value = 'info'
+      }
     }
-  }, 3000)
+  }, 8000)
 }
 
 const getCorrectVal = (p) => {
@@ -272,8 +401,12 @@ const checkAnswer = () => {
   
   if (val === correctVal) {
     // 正确
-    score.value += (100 / totalQuestions) // 简单分数计算
-    correctCount.value++
+    // 只有未曾出错才加分
+    if (!hasErrorInCurrent.value) {
+      score.value += (100 / totalQuestions)
+      correctCount.value++
+    }
+    
     feedbackMessage.value = '🎉 太棒了！正确！'
     feedbackClass.value = 'success'
     
@@ -281,21 +414,16 @@ const checkAnswer = () => {
     setTimeout(nextQuestion, 1000)
   } else {
     // 错误
+    hasErrorInCurrent.value = true // 标记当前题目出错过
     feedbackMessage.value = '❌ 哎呀，不对哦'
     feedbackClass.value = 'error'
-    isProcessing.value = false // 允许重试？
-    // 需求说：要给结果页面 打分 错题 打印
-    // 这意味着错误也应该被记录，然后进入下一题？或者允许重试？
-    // 通常 Pass 才是跳过。错误可以重试，也可以算错直接下一题。
-    // 为了简单起见，我们允许用户重试，如果用户点 Pass 或者一直错到最后，才算错。
-    // 但为了“错题打印”，我们需要记录用户做错过的题。
-    // 策略：如果答错了，记录到错题本（如果不重复记录），并提示错误。用户可以继续尝试。
+    isProcessing.value = false // 允许重试
     
-    // 检查是否已经记录过
+    // 记录错题（去重）
     const alreadyRecorded = wrongAnswers.value.some(w => w.problem.id === p.id)
     if (!alreadyRecorded) {
       wrongAnswers.value.push({
-        problem: p,
+        problem: JSON.parse(JSON.stringify(p)), // 深度复制防止引用问题
         userAnswer: val
       })
     }
@@ -305,13 +433,14 @@ const checkAnswer = () => {
 const passQuestion = () => {
   if (isProcessing.value) return
   isProcessing.value = true
+  hasErrorInCurrent.value = true // Pass 也算错
   
   // Pass 算错
   const p = problem.value
   const alreadyRecorded = wrongAnswers.value.some(w => w.problem.id === p.id)
   if (!alreadyRecorded) {
     wrongAnswers.value.push({
-      problem: p,
+      problem: JSON.parse(JSON.stringify(p)), // 深度复制
       userAnswer: 'Pass'
     })
   }
@@ -331,26 +460,15 @@ const nextQuestion = () => {
 }
 
 const finishGame = () => {
-  // 跳转到结果页
-  // 使用 name 跳转并传递 params 需要在路由配置 props: true
-  // 这里我们使用 state 或者 query 传递复杂对象有点麻烦，
-  // 推荐使用 pinia，但这里没装。
-  // 简单起见，我们通过 params 传参（Vue Router 4 params 在刷新后会丢失，除非 history state）
-  // 或者直接把数据放在 query 里（如果是简单的）
-  // wrongAnswers 可能是个数组，JSON.stringify 放 query 吧
+  // 使用 sessionStorage 传递数据，避免 router state 丢失问题
+  const resultData = {
+    totalQuestions,
+    correctCount: correctCount.value,
+    wrongAnswers: JSON.parse(JSON.stringify(wrongAnswers.value))
+  }
+  sessionStorage.setItem('gameResult', JSON.stringify(resultData))
   
-  // 注意：路由需要支持 params 传递对象不太行，最好用 query 传 JSON
-  // 但 wrongAnswers 可能很长。
-  // 让我们试试 history.state
-  
-  router.push({
-    name: 'result',
-    state: {
-      totalQuestions,
-      correctCount: correctCount.value,
-      wrongAnswers: JSON.parse(JSON.stringify(wrongAnswers.value))
-    }
-  })
+  router.push({ name: 'result' })
 }
 
 onMounted(initGame)
@@ -436,26 +554,82 @@ onMounted(initGame)
   background: #f0f4f8;
   padding: 30px;
   border-radius: 20px;
-  min-height: 300px;
+  min-height: 400px; /* 增加高度 */
   justify-content: center;
+}
+
+.triangle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.triangle-top {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.triangle-lines {
+  display: flex;
+  justify-content: center;
+  gap: 80px; /* 增加间距 */
+  width: 240px; /* 增加宽度 */
+  height: 60px; /* 增加高度 */
+  position: relative;
+  margin: 10px 0; /* 上下增加留白 */
+}
+
+.line-left, .line-right {
+  width: 3px; /* 加粗线条 */
+  height: 70px; /* 增加长度 */
+  background-color: #ccc; /* 颜色更柔和 */
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+}
+
+.line-left {
+  left: 50%;
+  transform: translateX(-50%) rotate(35deg); /* 调整角度 */
+  transform-origin: top center;
+}
+
+.line-right {
+  left: 50%;
+  transform: translateX(-50%) rotate(-35deg); /* 调整角度 */
+  transform-origin: top center;
+}
+
+.triangle-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 60px; /* 增加底部两个节点的间距 */
+  width: 100%;
+}
+
+.bottom-node {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 200px;
+}
+
+.emoji-node {
+  border: 2px dashed rgba(0,0,0,0.1); /* 增加边框方便看范围 */
+  min-width: 60px;
+  min-height: 60px;
 }
 
 @media (prefers-color-scheme: dark) {
   .visual-area {
     background: #2c3e50;
   }
-}
-
-.visual-row {
-  min-height: 60px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.operator-visual {
-  font-size: 2rem;
-  color: #aaa;
+  .emoji-node {
+    border-color: rgba(255,255,255,0.1);
+  }
 }
 
 .hint-btn {
@@ -530,6 +704,11 @@ input:focus {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
+}
+
+.voice-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 .action-buttons {

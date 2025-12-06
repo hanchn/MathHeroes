@@ -42,11 +42,19 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// 从 history.state 获取数据
-const state = history.state || {}
-const totalQuestions = state.totalQuestions || 10
-const correctCount = state.correctCount || 0
-const wrongAnswers = state.wrongAnswers || []
+// 从 sessionStorage 获取数据
+let totalQuestions = 10
+let correctCount = 0
+let wrongAnswers = []
+
+try {
+  const data = JSON.parse(sessionStorage.getItem('gameResult') || '{}')
+  totalQuestions = data.totalQuestions || 10
+  correctCount = data.correctCount || 0
+  wrongAnswers = data.wrongAnswers || []
+} catch (e) {
+  console.error('Parse result error', e)
+}
 
 const score = computed(() => {
   if (totalQuestions === 0) return 0
@@ -61,12 +69,16 @@ const getComment = (s) => {
 }
 
 const getCorrectAnswer = (p) => {
+  if (p.type === 'complex') return p.result
   if (p.blankIndex === 0) return p.num1
   if (p.blankIndex === 1) return p.num2
   return p.result
 }
 
 const formatQuestion = (p) => {
+  if (p.type === 'complex') {
+    return `${p.num1} ${p.operator1} ${p.num2} ${p.operator2} ${p.num3} = ${p.result}`
+  }
   // 还原题目字符串，例如 3 + ? = 5
   let p1 = p.blankIndex === 0 ? '___' : p.num1
   let p2 = p.blankIndex === 1 ? '___' : p.num2
@@ -198,17 +210,28 @@ button:hover {
 
 @media print {
   .no-print {
-    display: none;
+    display: none !important;
   }
   .result-container {
     padding: 0;
     box-shadow: none;
+    margin: 0;
+    max-width: 100%;
   }
   .mistakes-section {
     border: none;
+    padding-top: 0;
   }
   .mistake-item {
     border-bottom: 1px solid #000;
+    page-break-inside: avoid;
+  }
+  body {
+    background: white;
+  }
+  /* 确保打印时文字颜色为黑色 */
+  * {
+    color: black !important;
   }
 }
 </style>

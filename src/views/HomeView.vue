@@ -12,12 +12,21 @@
         <div class="icon">✖️</div>
         <h2>乘法大师</h2>
         <p>99乘法表与进阶乘法</p>
+        <button class="table-link" @click.stop="router.push({ name: 'multiplication-table' })">
+          📅 乘法表
+        </button>
       </div>
       
       <div class="card divide" @click="selectMode('divide')">
         <div class="icon">➗</div>
         <h2>除法探险</h2>
         <p>除法练习</p>
+      </div>
+
+      <div class="card complex" @click="selectMode('complex')">
+        <div class="icon">🧮</div>
+        <h2>复杂运算</h2>
+        <p>加减乘除混合挑战</p>
       </div>
     </div>
   </div>
@@ -64,6 +73,7 @@ h1 {
   transition: transform 0.2s, box-shadow 0.2s;
   border: 2px solid #e9ecef;
   color: #2c3e50;
+  position: relative; /* 允许绝对定位 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -91,5 +101,23 @@ h2 {
 
 p {
   opacity: 0.8;
+}
+
+.table-link {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #42b983;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.table-link:hover {
+  background: #3aa876;
 }
 </style>

@@ -22,7 +22,7 @@
       <h3>题目数量</h3>
       <div class="options-row">
         <button 
-          v-for="count in [10, 20, 30, 50]"
+          v-for="count in [3, 5, 10, 20, 30, 50]"
           :key="count"
           :class="{ active: questionCount === count }"
           @click="questionCount = count"
@@ -145,7 +145,8 @@ h3 {
 
 .options-row {
   display: flex;
-  gap: 20px;
+  gap: 15px;
+  flex-wrap: wrap; /* 允许换行，防止小屏幕溢出 */
 }
 
 button {

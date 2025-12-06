@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import GameView from '../views/GameView.vue'
 import ResultView from '../views/ResultView.vue'
+import MultiplicationTableView from '../views/MultiplicationTableView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,7 +28,12 @@ const router = createRouter({
       path: '/result',
       name: 'result',
       component: ResultView,
-      props: true // 允许通过 params 传递结果数据
+      props: true
+    },
+    {
+      path: '/multiplication-table',
+      name: 'multiplication-table',
+      component: MultiplicationTableView
     }
   ]
 })

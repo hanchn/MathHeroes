@@ -19,6 +19,20 @@
     </div>
 
     <div class="setting-section">
+      <h3>题目数量</h3>
+      <div class="options-row">
+        <button 
+          v-for="count in [10, 20, 30, 50]"
+          :key="count"
+          :class="{ active: questionCount === count }"
+          @click="questionCount = count"
+        >
+          {{ count }} 题
+        </button>
+      </div>
+    </div>
+
+    <div class="setting-section">
       <h3>选择模式</h3>
       <div class="options-row">
         <button 
@@ -63,6 +77,7 @@ const ranges = [
 ]
 
 const selectedRange = ref(10)
+const questionCount = ref(10)
 const mode = ref('normal') // normal, mental
 
 const startGame = () => {
@@ -71,6 +86,7 @@ const startGame = () => {
     query: {
       type,
       range: selectedRange.value,
+      count: questionCount.value,
       mode: mode.value
     }
   })

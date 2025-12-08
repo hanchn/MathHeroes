@@ -197,15 +197,4 @@ p {
   text-align: center; /* 确保文字居中 */
   line-height: 1.4;
 }
-
-@media (prefers-color-scheme: dark) {
-  .card {
-    background: #2c3e50;
-    color: #ecf0f1;
-  }
-  .back-btn {
-    background: #333;
-    color: white;
-  }
-}
 </style>

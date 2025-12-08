@@ -96,21 +96,21 @@ const printResults = () => {
   max-width: 800px;
   margin: 0 auto;
   padding: 40px 20px;
-  background: white;
   min-height: 100vh;
-  color: #2c3e50;
+  color: var(--text-main);
 }
 
 h1 {
-  color: #42b983;
+  color: var(--success-color);
   font-size: 2.5rem;
   margin-bottom: 30px;
+  font-weight: 900;
 }
 
 .score-card {
-  background: #f8f9fa;
+  background: var(--bg-card);
   padding: 40px;
-  border-radius: 20px;
+  border-radius: 30px;
   margin-bottom: 40px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
@@ -119,31 +119,32 @@ h1 {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: #42b983;
+  background: var(--gradient-green);
   color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  box-shadow: 0 5px 15px rgba(66, 185, 131, 0.4);
+  box-shadow: 0 10px 20px rgba(29, 209, 161, 0.4);
 }
 
 .score-value {
   font-size: 3.5rem;
-  font-weight: bold;
+  font-weight: 900;
   line-height: 1;
 }
 
 .score-total {
   font-size: 1rem;
   opacity: 0.8;
+  font-weight: 600;
 }
 
 .comment {
   font-size: 1.5rem;
-  font-weight: bold;
-  color: #666;
+  font-weight: 800;
+  color: var(--text-secondary);
 }
 
 .actions {
@@ -159,29 +160,38 @@ button {
   font-size: 1.2rem;
   border: none;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.3s;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
 .primary-btn {
-  background: #42b983;
-  color: white;
-  box-shadow: 0 5px 15px rgba(66, 185, 131, 0.3);
+  background: var(--gradient-blue);
+  box-shadow: 0 10px 20px rgba(84, 160, 255, 0.3);
 }
 
 .secondary-btn {
-  background: #ffc107;
-  color: #333;
-  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+  background: var(--gradient-orange);
+  box-shadow: 0 10px 20px rgba(255, 159, 67, 0.3);
 }
 
 .mistakes-section {
   text-align: left;
   border-top: 2px dashed #eee;
   padding-top: 30px;
+}
+
+.mistake-list {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .mistake-item {
@@ -193,19 +203,25 @@ button:hover {
   font-size: 1.2rem;
 }
 
+.mistake-item:last-child {
+  border-bottom: none;
+}
+
 .question {
-  font-weight: bold;
+  font-weight: 800;
   flex: 1;
+  color: var(--text-main);
 }
 
 .user-ans {
-  color: #f44336;
+  color: var(--danger-color);
   margin-right: 20px;
+  font-weight: 600;
 }
 
 .correct-ans {
-  color: #42b983;
-  font-weight: bold;
+  color: var(--success-color);
+  font-weight: 800;
 }
 
 @media print {
@@ -232,6 +248,8 @@ button:hover {
   /* 确保打印时文字颜色为黑色 */
   * {
     color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
   }
 }
 </style>

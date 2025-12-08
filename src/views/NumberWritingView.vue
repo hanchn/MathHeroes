@@ -208,7 +208,7 @@ watch(currentNumber, () => {
 .writing-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -217,16 +217,37 @@ watch(currentNumber, () => {
 .header {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .back-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 16px;
   border: none;
-  background: #f0f0f0;
   cursor: pointer;
+  background: white;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 700;
   margin-right: 20px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  border: 1px solid #eee;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.05);
+}
+
+h2 {
+  color: var(--text-main);
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  transform: translateX(-40px);
 }
 
 .canvas-area {
@@ -234,34 +255,48 @@ watch(currentNumber, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 .nav-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
   border: none;
-  background: #42b983;
-  color: white;
+  background: var(--bg-card);
+  color: var(--primary-color);
   font-size: 1.5rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.nav-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.1);
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 15px 30px rgba(255, 159, 67, 0.3);
 }
 
 .nav-btn:disabled {
-  background: #ccc;
+  background: #f0f0f0;
+  color: #ccc;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .canvas-wrapper {
   width: 400px;
   height: 400px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: var(--bg-card);
+  border-radius: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
   position: relative;
   overflow: hidden;
-  border: 4px dashed #ddd; /* 田字格效果可以用css画，这里先简单虚线框 */
+  border: 4px dashed #ddd;
 }
 
 /* 田字格辅助线 */
@@ -271,17 +306,17 @@ watch(currentNumber, () => {
   top: 50%;
   left: 0;
   width: 100%;
-  height: 1px;
-  background: #eee;
+  height: 2px;
+  background: #f0f0f0;
 }
 .canvas-wrapper::after {
   content: '';
   position: absolute;
   left: 50%;
   top: 0;
-  width: 1px;
+  width: 2px;
   height: 100%;
-  background: #eee;
+  background: #f0f0f0;
 }
 
 .template-number {
@@ -294,8 +329,8 @@ watch(currentNumber, () => {
   align-items: center;
   justify-content: center;
   font-size: 300px;
-  font-family: 'Courier New', Courier, monospace; /* 找个像一点的字体 */
-  color: #f0f0f0;
+  font-family: 'Courier New', Courier, monospace;
+  color: #f5f5f5;
   pointer-events: none;
   z-index: 1;
   user-select: none;
@@ -313,42 +348,40 @@ canvas {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .action-btn {
-  padding: 12px 25px;
-  border-radius: 25px;
+  padding: 15px 30px;
+  border-radius: 20px;
   border: none;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  color: white;
 }
 
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
-
-.action-btn:active {
-  transform: translateY(0);
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .clear {
-  background: #ffc107;
-  color: #333;
+  background: var(--gradient-orange);
+  box-shadow: 0 10px 20px rgba(255, 159, 67, 0.3);
 }
 
 .demo {
-  background: #2196f3;
-  color: white;
+  background: var(--gradient-blue);
+  box-shadow: 0 10px 20px rgba(84, 160, 255, 0.3);
 }
 </style>

@@ -623,15 +623,6 @@ onMounted(initGame)
   min-height: 60px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .visual-area {
-    background: #2c3e50;
-  }
-  .emoji-node {
-    border-color: rgba(255,255,255,0.1);
-  }
-}
-
 .hint-btn {
   background: #ffc107;
   color: #333;

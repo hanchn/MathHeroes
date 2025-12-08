@@ -7,7 +7,7 @@
 
     <div class="menu-grid">
       <div class="card" @click="navigateTo('recognize', '0-9')">
-        <div class="icon icon-green">0️⃣ ~ 9️⃣</div>
+        <div class="icon icon-green long-text">0️⃣ ~ 9️⃣</div>
         <h3>认识 0 ~ 9</h3>
         <p>基础数字认知</p>
       </div>
@@ -19,7 +19,7 @@
       </div>
 
       <div class="card" @click="navigateTo('recognize', '10-19')">
-        <div class="icon icon-orange">🔟 ~ 1️⃣9️⃣</div>
+        <div class="icon icon-orange long-text">🔟 ~ 1️⃣9️⃣</div>
         <h3>认识 10 ~ 19</h3>
         <p>进阶数字认知</p>
       </div>
@@ -159,15 +159,20 @@ h1 {
 }
 
 .icon {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin-bottom: 20px;
   transition: transform 0.3s;
+}
+
+.icon.long-text {
+  font-size: 1.8rem;
+  letter-spacing: -1px;
 }
 
 /* 使用半透明背景色代替渐变，更清爽 */

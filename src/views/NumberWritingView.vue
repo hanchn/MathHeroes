@@ -30,8 +30,8 @@
     </div>
 
     <div class="controls">
-      <button class="action-btn clear" @click="clearCanvas">🗑️ 清空重写</button>
-      <!-- 这里未来可以加“笔顺动画”按钮 -->
+      <button class="action-btn clear" @click="clearCanvas" :disabled="isDemoPlaying">🗑️ 清空重写</button>
+      <button class="action-btn demo" @click="playDemo" :disabled="isDemoPlaying">▶️ 笔画演示</button>
     </div>
   </div>
 </template>
@@ -62,7 +62,54 @@ const initCanvas = () => {
   ctx.lineWidth = 20
 }
 
-// ... (keep getPos, startDrawing, draw, stopDrawing)
+const getPos = (e) => {
+  const canvas = canvasRef.value
+  const rect = canvas.getBoundingClientRect()
+  let clientX, clientY
+  
+  if (e.touches) {
+    clientX = e.touches[0].clientX
+    clientY = e.touches[0].clientY
+  } else {
+    clientX = e.clientX
+    clientY = e.clientY
+  }
+  
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  }
+}
+
+const startDrawing = (e) => {
+  if (isDemoPlaying) return
+  isDrawing = true
+  const { x, y } = getPos(e)
+  lastX = x
+  lastY = y
+  // 恢复用户书写颜色
+  ctx.strokeStyle = '#2c3e50'
+  draw(e)
+}
+
+const draw = (e) => {
+  if (!isDrawing) return
+  e.preventDefault()
+  
+  const { x, y } = getPos(e)
+  
+  ctx.beginPath()
+  ctx.moveTo(lastX, lastY)
+  ctx.lineTo(x, y)
+  ctx.stroke()
+  
+  lastX = x
+  lastY = y
+}
+
+const stopDrawing = () => {
+  isDrawing = false
+}
 
 const clearCanvas = () => {
   if (isDemoPlaying) return

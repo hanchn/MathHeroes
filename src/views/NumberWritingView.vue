@@ -39,6 +39,7 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { numberPaths } from '@/utils/numberPaths'
 
 const router = useRouter()
 const currentNumber = ref(0)
@@ -47,6 +48,7 @@ let ctx = null
 let isDrawing = false
 let lastX = 0
 let lastY = 0
+let isDemoPlaying = false
 
 const initCanvas = () => {
   const canvas = canvasRef.value
@@ -55,65 +57,81 @@ const initCanvas = () => {
   canvas.height = wrapper.clientHeight
   
   ctx = canvas.getContext('2d')
-  ctx.strokeStyle = '#2c3e50' // 笔迹颜色
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
-  ctx.lineWidth = 20 // 笔迹粗细
+  ctx.lineWidth = 20
 }
 
-const getPos = (e) => {
-  const canvas = canvasRef.value
-  const rect = canvas.getBoundingClientRect()
-  let clientX, clientY
-  
-  if (e.touches) {
-    clientX = e.touches[0].clientX
-    clientY = e.touches[0].clientY
-  } else {
-    clientX = e.clientX
-    clientY = e.clientY
-  }
-  
-  return {
-    x: clientX - rect.left,
-    y: clientY - rect.top
-  }
-}
-
-const startDrawing = (e) => {
-  isDrawing = true
-  const { x, y } = getPos(e)
-  lastX = x
-  lastY = y
-  // 画一个点
-  draw(e)
-}
-
-const draw = (e) => {
-  if (!isDrawing) return
-  e.preventDefault() // 防止触摸滚动
-  
-  const { x, y } = getPos(e)
-  
-  ctx.beginPath()
-  ctx.moveTo(lastX, lastY)
-  ctx.lineTo(x, y)
-  ctx.stroke()
-  
-  lastX = x
-  lastY = y
-}
-
-const stopDrawing = () => {
-  isDrawing = false
-}
+// ... (keep getPos, startDrawing, draw, stopDrawing)
 
 const clearCanvas = () => {
+  if (isDemoPlaying) return
   const canvas = canvasRef.value
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
+const playDemo = async () => {
+  if (isDemoPlaying) return
+  isDemoPlaying = true
+  
+  const canvas = canvasRef.value
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  
+  const strokes = numberPaths[currentNumber.value]
+  if (!strokes) {
+    isDemoPlaying = false
+    return
+  }
+
+  ctx.strokeStyle = '#ff9800' // 演示颜色
+  
+  for (let i = 0; i < strokes.length; i++) {
+    const points = strokes[i]
+    if (points.length < 2) continue
+    
+    ctx.beginPath()
+    ctx.moveTo(points[0][0], points[0][1])
+    
+    for (let j = 1; j < points.length; j++) {
+      await animateLine(points[j-1], points[j])
+    }
+    
+    // 笔画之间稍微停顿
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  
+  isDemoPlaying = false
+  // 恢复用户书写颜色
+  ctx.strokeStyle = '#2c3e50'
+}
+
+const animateLine = (start, end) => {
+  return new Promise(resolve => {
+    const duration = 150 // 每段耗时
+    const startTime = performance.now()
+    
+    const animate = (time) => {
+      const progress = Math.min((time - startTime) / duration, 1)
+      
+      const x = start[0] + (end[0] - start[0]) * progress
+      const y = start[1] + (end[1] - start[1]) * progress
+      
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        resolve()
+      }
+    }
+    
+    requestAnimationFrame(animate)
+  })
+}
+
 const prevNumber = () => {
+  if (isDemoPlaying) return
   if (currentNumber.value > 0) {
     currentNumber.value--
     clearCanvas()
@@ -121,11 +139,13 @@ const prevNumber = () => {
 }
 
 const nextNumber = () => {
+  if (isDemoPlaying) return
   if (currentNumber.value < 9) {
     currentNumber.value++
     clearCanvas()
   }
 }
+
 
 onMounted(() => {
   initCanvas()

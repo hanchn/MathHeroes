@@ -312,16 +312,43 @@ canvas {
 .controls {
   display: flex;
   justify-content: center;
+  gap: 20px;
   margin-top: 20px;
 }
 
 .action-btn {
-  padding: 15px 30px;
-  border-radius: 30px;
+  padding: 12px 25px;
+  border-radius: 25px;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.clear {
   background: #ffc107;
   color: #333;
+}
+
+.demo {
+  background: #2196f3;
+  color: white;
 }
 </style>

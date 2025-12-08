@@ -107,12 +107,13 @@ h1 {
 
 .card {
   position: relative;
-  background: white;
+  background: rgba(255, 255, 255, 0.9); /* 增加透明度 */
+  backdrop-filter: blur(10px); /* 毛玻璃效果 */
   border-radius: 24px;
   padding: 40px 30px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.5); /* 细微边框 */
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   display: flex;
@@ -120,17 +121,46 @@ h1 {
   align-items: center;
 }
 
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover .card-bg {
+  opacity: 0.2;
+}
+
+.card > * {
+  position: relative; /* 确保内容在背景之上 */
+  z-index: 1;
+}
+
 .card:hover {
   transform: translateY(-10px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* 各个卡片的个性化颜色 */
-.number-learning .icon { background: #e0f7fa; color: #00bcd4; }
-.add-sub .icon { background: #e8f5e9; color: #4caf50; }
-.multiply .icon { background: #fff3e0; color: #ff9800; }
-.divide .icon { background: #f3e5f5; color: #9c27b0; }
-.complex .icon { background: #ffebee; color: #f44336; }
+.number-learning { border-bottom: 6px solid #00bcd4; }
+.add-sub { border-bottom: 6px solid #4caf50; }
+.multiply { border-bottom: 6px solid #ff9800; }
+.divide { border-bottom: 6px solid #9c27b0; }
+.complex { border-bottom: 6px solid #f44336; }
+
+.number-learning .icon { background: linear-gradient(135deg, #e0f7fa, #b2ebf2); color: #00838f; }
+.add-sub .icon { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
+.multiply .icon { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #ef6c00; }
+.divide .icon { background: linear-gradient(135deg, #f3e5f5, #e1bee7); color: #6a1b9a; }
+.complex .icon { background: linear-gradient(135deg, #ffebee, #ffcdd2); color: #c62828; }
 
 .icon {
   width: 80px;

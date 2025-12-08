@@ -2,7 +2,7 @@
   <div class="pv-container">
     <div class="header">
       <button class="back-btn" @click="router.back()">← 返回</button>
-      <h2>📊 认识数位</h2>
+      <h1>📊 认识数位</h1>
     </div>
 
     <div class="main-display">
@@ -45,16 +45,16 @@
 
     <div class="controls">
       <div class="btn-group">
-        <button @click="add(1)">+1 (个)</button>
-        <button @click="add(10)">+10 (十)</button>
-        <button @click="add(100)">+100 (百)</button>
-        <button @click="add(1000)">+1000 (千)</button>
-        <button @click="add(10000)">+1万</button>
+        <button class="control-btn" @click="add(1)">+1 (个)</button>
+        <button class="control-btn" @click="add(10)">+10 (十)</button>
+        <button class="control-btn" @click="add(100)">+100 (百)</button>
+        <button class="control-btn" @click="add(1000)">+1000 (千)</button>
+        <button class="control-btn" @click="add(10000)">+1万</button>
       </div>
       
       <div class="btn-group secondary">
-        <button @click="currentNumber = 0">归零</button>
-        <button @click="randomNum">随机数</button>
+        <button class="action-btn warning" @click="currentNumber = 0">归零</button>
+        <button class="action-btn success" @click="randomNum">随机数</button>
       </div>
     </div>
 
@@ -162,7 +162,7 @@ const numberToChinese = (num) => {
 .pv-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
   min-height: 100vh;
 }
 
@@ -173,26 +173,50 @@ const numberToChinese = (num) => {
 }
 
 .back-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 16px;
   border: none;
-  background: #f0f0f0;
   cursor: pointer;
+  background: white;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 700;
   margin-right: 20px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  border: 1px solid #eee;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.05);
+}
+
+h1 {
+  color: var(--text-main);
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  transform: translateX(-40px);
 }
 
 .main-display {
-  background: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: var(--bg-card);
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .counter-box {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 30px;
   flex-wrap: wrap;
 }
@@ -202,41 +226,55 @@ const numberToChinese = (num) => {
   flex-direction: column;
   align-items: center;
   background: #f8f9fa;
-  padding: 10px;
-  border-radius: 10px;
-  min-width: 60px;
+  padding: 15px;
+  border-radius: 16px;
+  min-width: 70px;
   border: 2px solid #eee;
+  transition: all 0.3s;
+}
+
+.number-row:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .number-row.active {
-  border-color: #42b983;
-  background: #e8f5e9;
+  border-color: var(--info-color);
+  background: rgba(72, 219, 251, 0.1);
 }
 
 .digit {
   font-size: 3rem;
-  font-weight: bold;
-  color: #2c3e50;
+  font-weight: 900;
+  color: var(--text-main);
 }
 
 .unit {
   font-size: 1rem;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 5px;
+  font-weight: 600;
 }
 
 .big-number {
-  font-size: 4rem;
-  font-weight: bold;
-  color: #42b983;
+  font-size: 5rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, var(--info-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-align: center;
   margin: 20px 0;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
 }
 
 .chinese-read {
   text-align: center;
-  font-size: 1.5rem;
-  color: #666;
+  font-size: 1.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  background: #f1f2f6;
+  padding: 10px 20px;
+  border-radius: 12px;
 }
 
 .controls {
@@ -248,34 +286,68 @@ const numberToChinese = (num) => {
 
 .btn-group {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-button {
-  padding: 15px 20px;
-  border-radius: 15px;
+.control-btn {
+  padding: 15px 25px;
+  border-radius: 16px;
   border: none;
-  background: #42b983;
-  color: white;
+  background: white;
+  color: var(--text-main);
   font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: all 0.2s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  border: 1px solid #eee;
 }
 
-button:active {
-  transform: scale(0.95);
+.control-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.05);
+  border-color: var(--info-color);
+  color: var(--info-color);
 }
 
-.secondary button {
-  background: #ffc107;
-  color: #333;
+.control-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+}
+
+.action-btn {
+  padding: 15px 40px;
+  border-radius: 20px;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.action-btn.warning {
+  background: var(--gradient-orange);
+  box-shadow: 0 10px 20px rgba(255, 159, 67, 0.3);
+}
+
+.action-btn.success {
+  background: var(--gradient-green);
+  box-shadow: 0 10px 20px rgba(29, 209, 161, 0.3);
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
 .explanation {
   text-align: center;
   margin-top: 40px;
-  color: #888;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
 }
 </style>

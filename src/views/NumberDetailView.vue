@@ -18,7 +18,7 @@
         <!-- 只有 0-19 显示 Emoji 辅助 -->
         <div class="visual-aid" v-if="currentNumber <= 20 && currentNumber > 0">
           <div class="emoji-grid">
-            <span v-for="n in currentNumber" :key="n">🍎</span>
+            <span v-for="n in currentNumber" :key="n" class="emoji-item">🍎</span>
           </div>
         </div>
 
@@ -63,21 +63,15 @@ const initList = () => {
   } else if (range === '10-19') {
     numberList.value = Array.from({ length: 10 }, (_, i) => i + 10)
   } else if (range === '20-99') {
-    // 随机取一些，还是全部？全部太多了，取间隔或者随机20个
-    // 为了学习，我们可以按 20, 21...30, 40, 50... 这样展示典型数字
     const list = []
-    // 20-29
     for(let i=20; i<=29; i++) list.push(i)
-    // 整十
     for(let i=30; i<=90; i+=10) list.push(i)
-    // 随机几个 30-99 的非整十
     for(let i=0; i<10; i++) {
       const n = Math.floor(Math.random() * 70) + 30
       if (!list.includes(n)) list.push(n)
     }
     numberList.value = list.sort((a,b) => a-b)
   } else {
-    // 100-999
     const list = [100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
     for(let i=0; i<10; i++) {
       const n = Math.floor(Math.random() * 900) + 100
@@ -103,7 +97,6 @@ const speakNumber = () => {
   window.speechSynthesis.speak(utterance)
 }
 
-// 简单的数字转中文 (仅用于辅助显示)
 const numberToChinese = (num) => {
   const chnNumChar = ["零","一","二","三","四","五","六","七","八","九"]
   const chnUnitSection = ["","万","亿","万亿","亿亿"]
@@ -151,7 +144,6 @@ const numberToChinese = (num) => {
     unitPos++
   }
   
-  // 处理“一十”开头读作“十”的习惯
   if (chnStr.startsWith('一十')) {
     chnStr = chnStr.substring(1)
   }
@@ -161,11 +153,9 @@ const numberToChinese = (num) => {
 
 onMounted(() => {
   initList()
-  // 自动朗读第一个
   setTimeout(speakNumber, 500)
 })
 
-// 监听键盘左右键
 window.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') prevNumber()
   if (e.key === 'ArrowRight') nextNumber()
@@ -174,9 +164,9 @@ window.addEventListener('keydown', (e) => {
 
 <style scoped>
 .detail-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -185,16 +175,37 @@ window.addEventListener('keydown', (e) => {
 .header {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .back-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 16px;
   border: none;
-  background: #f0f0f0;
   cursor: pointer;
+  background: white;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 700;
   margin-right: 20px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  border: 1px solid #eee;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.05);
+}
+
+h2 {
+  color: var(--text-main);
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  transform: translateX(-40px);
 }
 
 .content-area {
@@ -206,22 +217,33 @@ window.addEventListener('keydown', (e) => {
 }
 
 .nav-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
   border: none;
-  background: #42b983;
-  color: white;
+  background: var(--bg-card);
+  color: var(--primary-color);
   font-size: 1.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.nav-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.1);
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 15px 30px rgba(255, 159, 67, 0.3);
 }
 
 .nav-btn:disabled {
-  background: #ccc;
+  background: #f0f0f0;
+  color: #ccc;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .number-display {
@@ -230,70 +252,103 @@ window.addEventListener('keydown', (e) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 40px;
 }
 
 .number-card {
-  background: white;
-  padding: 40px;
-  border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: var(--bg-card);
+  padding: 60px;
+  border-radius: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s;
-  min-width: 200px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 260px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-.number-card:active {
-  transform: scale(0.95);
+.number-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+  border-color: var(--info-color);
 }
 
 .big-number {
-  font-size: 8rem;
-  font-weight: bold;
-  color: #2c3e50;
+  font-size: 10rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--info-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   line-height: 1;
+  filter: drop-shadow(0 4px 0 rgba(0,0,0,0.1));
 }
 
 .speak-btn {
-  margin-top: 10px;
-  background: none;
+  margin-top: 20px;
+  background: rgba(72, 219, 251, 0.1);
   border: none;
   font-size: 2rem;
   cursor: pointer;
-  opacity: 0.5;
+  padding: 15px;
+  border-radius: 50%;
+  transition: all 0.3s;
+  color: var(--info-color);
+}
+
+.speak-btn:hover {
+  transform: scale(1.1);
+  background: var(--info-color);
+  color: white;
 }
 
 .visual-aid {
-  background: rgba(255,255,255,0.5);
-  padding: 20px;
-  border-radius: 15px;
+  background: rgba(255,255,255,0.6);
+  padding: 30px;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
 }
 
 .emoji-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
   justify-content: center;
-  max-width: 300px;
+  max-width: 400px;
 }
 
-.emoji-grid span {
-  font-size: 2rem;
+.emoji-item {
+  font-size: 2.5rem;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .text-aid {
-  font-size: 2rem;
-  color: #666;
-  font-weight: bold;
+  font-size: 3rem;
+  color: var(--text-secondary);
+  font-weight: 900;
+  background: white;
+  padding: 20px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
 }
 
 .progress {
   text-align: center;
-  margin-top: 20px;
-  color: #999;
+  margin-top: 30px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: rgba(255,255,255,0.5);
+  padding: 8px 20px;
+  border-radius: 20px;
+  align-self: center;
 }
 </style>

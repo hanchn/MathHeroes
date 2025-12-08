@@ -8,6 +8,7 @@ import NumberLearningMenu from '../views/NumberLearningMenu.vue'
 import NumberDetailView from '../views/NumberDetailView.vue'
 import NumberWritingView from '../views/NumberWritingView.vue'
 import PlaceValueView from '../views/PlaceValueView.vue'
+import NumberCompositionView from '../views/NumberCompositionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/number-learning',
       name: 'number-learning',
       component: NumberLearningMenu
+    },
+    {
+      path: '/number-composition',
+      name: 'number-composition',
+      component: NumberCompositionView
     },
     {
       path: '/number-learning/recognize/:range',

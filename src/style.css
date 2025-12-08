@@ -1,10 +1,30 @@
 :root {
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft YaHei', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* 全新调色板 - 温暖活泼的儿童风格 */
+  --primary-color: #FF9F43;   /* 活力橙 */
+  --secondary-color: #54A0FF; /* 天空蓝 */
+  --success-color: #1DD1A1;   /* 清新绿 */
+  --danger-color: #FF6B6B;    /* 珊瑚红 */
+  --info-color: #48DBFB;      /* 青空蓝 */
+  --text-main: #222F3E;       /* 深灰 */
+  --text-secondary: #576574;  /* 浅灰 */
+  
+  --bg-page: #F7F9FC;         /* 极淡的蓝灰色背景 */
+  --bg-card: #FFFFFF;
+  
+  /* 渐变色 */
+  --gradient-orange: linear-gradient(135deg, #FF9F43 0%, #FECA57 100%);
+  --gradient-blue: linear-gradient(135deg, #54A0FF 0%, #2E86DE 100%);
+  --gradient-green: linear-gradient(135deg, #1DD1A1 0%, #10AC84 100%);
+  --gradient-red: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%);
+  
+  /* 字体 */
+  font-family: 'Nunito', 'Comic Sans MS', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+  font-weight: 600;
   color-scheme: light;
-  color: #2c3e50;
-  background-color: #f0f4f8;
+  color: var(--text-main);
+  background-color: var(--bg-page);
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,14 +37,24 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #e6f3ff; /* 柔和的淡蓝色背景 */
+  
+  /* 更加柔和可爱的背景图案 */
+  background-color: #FFF5F5;
   background-image: 
-    linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(255,255,255,0.5) 2px, transparent 2px),
-    linear-gradient(rgba(255,255,255,0.28) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px);
-  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-  background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+    radial-gradient(#FF9F43 15%, transparent 16%),
+    radial-gradient(#54A0FF 15%, transparent 16%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  opacity: 1;
+}
+
+/* 增加一个半透明遮罩让背景不那么刺眼 */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: -1;
 }
 
 #app {
@@ -33,46 +63,49 @@ body {
   padding: 2rem;
   text-align: center;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 button {
-  border-radius: 12px;
+  border-radius: 16px;
   border: none;
   padding: 0.8em 1.5em;
   font-size: 1em;
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1); /* 更有立体感的按钮 */
 }
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.1);
 }
 
 button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
 
 /* 滚动条美化 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 4px;
+  background: #CBD5E0;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+  background-color: #A4B0BE;
 }

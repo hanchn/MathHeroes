@@ -13,6 +13,13 @@
         <p>从 0 到 1000，探索数字奥秘</p>
       </div>
 
+      <div class="card number-composition" @click="selectMode('number-composition')">
+        <div class="card-bg"></div>
+        <div class="icon">🧩</div>
+        <h2>数字组合</h2>
+        <p>探索数字的组成与拆解</p>
+      </div>
+
       <div class="card add-sub" @click="selectMode('add_sub')">
         <div class="card-bg"></div>
         <div class="icon">➕➖</div>
@@ -55,6 +62,8 @@ const router = useRouter()
 const selectMode = (type) => {
   if (type === 'number-learning') {
     router.push({ name: 'number-learning' })
+  } else if (type === 'number-composition') {
+    router.push({ name: 'number-composition' })
   } else {
     router.push({ name: 'settings', params: { type } })
   }
@@ -85,16 +94,19 @@ const selectMode = (type) => {
 h1 {
   font-size: 4rem;
   margin: 0;
-  background: linear-gradient(45deg, #42b983, #3498db);
+  /* 使用新的渐变色 */
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+  font-weight: 900;
 }
 
 .subtitle {
   font-size: 1.5rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 10px;
+  font-weight: 600;
 }
 
 .menu {
@@ -107,15 +119,14 @@ h1 {
 
 .card {
   position: relative;
-  background: rgba(255, 255, 255, 0.9); /* 增加透明度 */
-  backdrop-filter: blur(10px); /* 毛玻璃效果 */
+  background: var(--bg-card);
   border-radius: 24px;
   padding: 40px 30px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.5); /* 细微边框 */
+  border: 2px solid transparent;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,32 +155,58 @@ h1 {
 }
 
 .card:hover {
-  transform: translateY(-10px) scale(1.02);
+  transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary-color);
 }
 
-/* 各个卡片的个性化颜色 */
-.number-learning { border-bottom: 6px solid #00bcd4; }
-.add-sub { border-bottom: 6px solid #4caf50; }
-.multiply { border-bottom: 6px solid #ff9800; }
-.divide { border-bottom: 6px solid #9c27b0; }
-.complex { border-bottom: 6px solid #f44336; }
+/* 卡片底部条改用伪元素实现更柔和的效果 */
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: #ddd;
+  transition: height 0.3s;
+}
 
-.number-learning .icon { background: linear-gradient(135deg, #e0f7fa, #b2ebf2); color: #00838f; }
-.add-sub .icon { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
-.multiply .icon { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #ef6c00; }
-.divide .icon { background: linear-gradient(135deg, #f3e5f5, #e1bee7); color: #6a1b9a; }
-.complex .icon { background: linear-gradient(135deg, #ffebee, #ffcdd2); color: #c62828; }
+.card:hover::after {
+  height: 8px;
+}
+
+/* 移除之前的 border-bottom，改用伪元素背景色 */
+.number-learning::after { background: var(--info-color); }
+.number-composition::after { background: #e056fd; }
+.add-sub::after { background: var(--success-color); }
+.multiply::after { background: var(--primary-color); }
+.divide::after { background: #9c27b0; }
+.complex::after { background: var(--danger-color); }
+
+.number-learning { border-bottom: none; }
+.number-composition { border-bottom: none; }
+.add-sub { border-bottom: none; }
+.multiply { border-bottom: none; }
+.divide { border-bottom: none; }
+.complex { border-bottom: none; }
+
+/* 图标渐变优化 */
+.number-learning .icon { background: rgba(72, 219, 251, 0.15); color: var(--info-color); }
+.number-composition .icon { background: rgba(224, 86, 253, 0.15); color: #e056fd; }
+.add-sub .icon { background: rgba(29, 209, 161, 0.15); color: var(--success-color); }
+.multiply .icon { background: rgba(255, 159, 67, 0.15); color: var(--primary-color); }
+.divide .icon { background: rgba(156, 39, 176, 0.15); color: #9c27b0; }
+.complex .icon { background: rgba(255, 107, 107, 0.15); color: var(--danger-color); }
 
 .icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  border-radius: 24px; /* 方圆形图标更现代 */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 3.5rem;
   margin-bottom: 20px;
   transition: transform 0.3s;
 }
@@ -181,19 +218,21 @@ h1 {
 h2 {
   font-size: 1.8rem;
   margin: 10px 0;
-  color: #2c3e50;
+  color: var(--text-main);
+  font-weight: 800;
 }
 
 p {
-  color: #7f8c8d;
+  color: var(--text-secondary);
   font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .table-link {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: #ff9800;
+  background: var(--primary-color);
   color: white;
   border: none;
   border-radius: 20px;
@@ -201,11 +240,11 @@ p {
   font-size: 0.9rem;
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3);
 }
 
 .table-link:hover {
-  background: #f57c00;
+  background: #f39c12;
   transform: translateY(-2px);
 }
 </style>
